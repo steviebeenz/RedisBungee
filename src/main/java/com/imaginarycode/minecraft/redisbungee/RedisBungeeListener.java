@@ -43,8 +43,12 @@ public class RedisBungeeListener implements Listener {
     private final RedisBungee plugin;
     private final List<InetAddress> exemptAddresses;
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onLogin(final LoginEvent event) {
+        if(event.isCancelled()) {
+            return;
+        }
+        
         event.registerIntent(plugin);
         plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
@@ -131,7 +135,7 @@ public class RedisBungeeListener implements Listener {
         });
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onPing(final ProxyPingEvent event) {
         if (exemptAddresses.contains(event.getConnection().getAddress().getAddress())) {
             return;
@@ -148,6 +152,10 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPluginMessage(final PluginMessageEvent event) {
+        if(event.isCancelled()) {
+            return;
+        }
+        
         if ((event.getTag().equals("legacy:RedisBungee") || event.getTag().equals("RedisBungee")) && event.getSender() instanceof Server) {
             final String currentChannel = event.getTag();
             final byte[] data = Arrays.copyOf(event.getData(), event.getData().length);
